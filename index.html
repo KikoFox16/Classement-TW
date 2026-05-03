@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Classement - Territory War</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #000000 100%);
+            --accent-yellow: #f1c40f;
+            --accent-blue: #3498db;
+            --text-white: #ffffff;
+            --panel-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-white);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .stats-container {
+            width: 90%;
+            max-width: 600px;
+            height: 85vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--panel-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(to bottom, #fff, var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: var(--accent-blue);
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .leaderboard-wrapper {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .leaderboard-wrapper::-webkit-scrollbar { width: 5px; }
+        .leaderboard-wrapper::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 10px; }
+
+        .player-card {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .rank {
+            font-size: 1.2rem;
+            font-weight: 900;
+            width: 40px;
+            color: var(--accent-blue);
+        }
+
+        .rank.top-1 { color: var(--accent-yellow); text-shadow: 0 0 10px rgba(241, 196, 15, 0.5); }
+
+        .player-name { font-weight: bold; font-size: 1.05rem; display: block; }
+
+        .player-stats { display: flex; gap: 15px; margin-top: 4px; }
+
+        .stat-item { font-size: 0.85rem; display: flex; align-items: center; gap: 4px; }
+        .stat-coins { color: var(--accent-yellow); }
+        .stat-zones { color: var(--accent-blue); }
+
+        #loader { text-align: center; padding: 50px; color: var(--accent-blue); }
+        
+        .auto-status {
+            text-align: center;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.3);
+            margin-top: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="stats-container">
+    <header>
+        <h1>Classement Territory War</h1>
+        <div class="subtitle"></div>
+    </header>
+
+    <div class="leaderboard-wrapper">
+        <div id="loader">Chargement des données Firebase...</div>
+        <div id="leaderboard-list"></div>
+    </div>
+
+    <div class="auto-status">Mise à jour automatique sur Discord (1h)</div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+
+    // Configuration Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyBqRloMg22mDsnfqhNK77vREQYtLFBgyf0",
+        authDomain: "territory-war-acfca.firebaseapp.com",
+        databaseURL: "https://territory-war-acfca-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "territory-war-acfca",
+        storageBucket: "territory-war-acfca.firebasestorage.app",
+        messagingSenderId: "399616663350",
+        appId: "1:399616663350:web:b69d53d353181cbe679d97"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1499848607069769908/mkPbjShwO__s1_yOfdmYTYCGNmQxWWKsSZT4ZvRV_eYZ8eU5PiBYoTveK5kN8v5J8vDz";
+
+    let playersData = [];
+
+    // Récupération des données en temps réel (pour l'affichage sur la page)
+    const usersRef = ref(db, 'users');
+    onValue(usersRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+
+        playersData = Object.keys(data).map(uid => ({
+            name: data[uid].username || "Inconnu",
+            coins: data[uid].coins || 0,
+            zones: data[uid].zonesCount || 0
+        })).sort((a, b) => b.zones - a.zones);
+
+        renderLeaderboard();
+    });
+
+    function renderLeaderboard() {
+        const list = document.getElementById('leaderboard-list');
+        const loader = document.getElementById('loader');
+        
+        loader.style.display = 'none';
+        list.innerHTML = "";
+
+        playersData.forEach((player, index) => {
+            const rank = index + 1;
+            const card = document.createElement('div');
+            card.className = 'player-card';
+            card.innerHTML = `
+                <div class="rank ${rank === 1 ? 'top-1' : ''}">#${rank}</div>
+                <div class="player-info">
+                    <span class="player-name">${player.name}</span>
+                    <div class="player-stats">
+                        <div class="stat-item stat-coins">💰 ${player.coins}</div>
+                        <div class="stat-item stat-zones">🚩 ${player.zones} zones</div>
+                    </div>
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    // Fonction d'envoi automatique vers Discord avec "boutons"
+    async function sendDiscordUpdate() {
+        if (playersData.length === 0) return;
+
+        const top10 = playersData.slice(0, 10);
+        let description = "🏆 **CLASSEMENT DES GÉNÉRAUX** 🏆\n\n";
+        
+        top10.forEach((p, i) => {
+            description += `**#${i+1}** | ${p.name} — \`${p.zones} Territoires\`\n`;
+        });
+
+        // "Boutons" de navigation (Hyperliens formatés)
+        description += "\n---";
+        description += "\n🎮 **[JOUER AU JEU](https://kikofox16.github.io/Territory-War/)**";
+        description += "\n📊 **[CLASSEMENT EN DIRECT](https://kikofox16.github.io/Classement-TW/)**";
+
+        const payload = {
+            embeds: [{
+                title: "Territory War - Rapport de Guerre",
+                url: "https://kikofox16.github.io/Classement-TW/",
+                description: description,
+                color: 3447003,
+                timestamp: new Date().toISOString(),
+                footer: { text: "Mise à jour automatique horaire" }
+            }]
+        };
+
+        try {
+            await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            console.log("Rapport envoyé à Discord.");
+        } catch (e) {
+            console.error("Erreur Webhook:", e);
+        }
+    }
+
+    // Intervalle de 1 heure (3600000 ms)
+    setInterval(sendDiscordUpdate, 3600000);
+    
+    // Premier envoi après 5 secondes pour valider le fonctionnement
+    setTimeout(sendDiscordUpdate, 5000);
+
+</script>
+
+</body>
+</html>
