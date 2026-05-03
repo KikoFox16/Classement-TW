@@ -120,7 +120,7 @@
     </header>
 
     <div class="leaderboard-wrapper">
-        <div id="loader">Chargement des données Firebase...</div>
+        <div id="loader">Chargement des données...</div>
         <div id="leaderboard-list"></div>
     </div>
 
@@ -144,7 +144,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const WEBHOOK_URL = "https://discord.com/api/webhooks/1499848607069769908/mkPbjShwO__s1_yOfdmYTYCGNmQxWWKsSZT4ZvRV_eYZ8eU5PiBYoTveK5kN8v5J8vDz";
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1499848592502948023/UdkDYEnweBkJBRo7ZmtWwhgSw152y9hvnUcPWrcOoJtvahPpx8RuF7TiO5IfnepGSklG";
 
     let playersData = [];
 
@@ -193,7 +193,7 @@
         if (playersData.length === 0) return;
 
         const top10 = playersData.slice(0, 10);
-        let description = "🏆 **CLASSEMENT DES GÉNÉRAUX** 🏆\n\n";
+        let description = "🏆 **CLASSEMENT DES CONQUÉRANTS** 🏆\n\n";
         
         top10.forEach((p, i) => {
             description += `**#${i+1}** | ${p.name} — \`${p.zones} Territoires\`\n`;
