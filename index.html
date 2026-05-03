@@ -26,112 +26,99 @@
         }
 
         .stats-container {
-            width: 90%;
-            max-width: 600px;
-            height: 85vh;
+            width: 95%;
+            max-width: 650px;
+            height: 90vh;
             display: flex;
             flex-direction: column;
             background: var(--panel-bg);
             backdrop-filter: blur(15px);
             border: 1px solid rgba(52, 152, 219, 0.3);
             border-radius: 24px;
-            padding: 25px;
+            padding: 20px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             box-sizing: border-box;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
+        header { text-align: center; margin-bottom: 20px; }
+        h1 { margin: 0; font-size: 1.6rem; text-transform: uppercase; letter-spacing: 3px; background: linear-gradient(to bottom, #fff, var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        h1 {
-            margin: 0;
-            font-size: 1.8rem;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            background: linear-gradient(to bottom, #fff, var(--accent-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .subtitle {
-            font-size: 0.8rem;
-            color: var(--accent-blue);
-            font-weight: bold;
-            margin-top: 5px;
-        }
-
-        .leaderboard-wrapper {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
+        .leaderboard-wrapper { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
         .leaderboard-wrapper::-webkit-scrollbar { width: 5px; }
         .leaderboard-wrapper::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 10px; }
 
         .player-card {
             display: flex;
             align-items: center;
-            background: rgba(0, 0, 0, 0.3);
-            margin-bottom: 10px;
-            padding: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            margin-bottom: 12px;
+            padding: 12px 18px;
             border-radius: 15px;
             border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.2s;
         }
 
-        .rank {
-            font-size: 1.2rem;
-            font-weight: 900;
-            width: 40px;
-            color: var(--accent-blue);
-        }
-
+        .rank { font-size: 1.2rem; font-weight: 900; width: 45px; color: var(--accent-blue); }
         .rank.top-1 { color: var(--accent-yellow); text-shadow: 0 0 10px rgba(241, 196, 15, 0.5); }
 
-        .player-name { font-weight: bold; font-size: 1.05rem; display: block; }
-
-        .player-stats { display: flex; gap: 15px; margin-top: 4px; }
-
-        .stat-item { font-size: 0.85rem; display: flex; align-items: center; gap: 4px; }
-        .stat-coins { color: var(--accent-yellow); }
-        .stat-zones { color: var(--accent-blue); }
-
-        #loader { text-align: center; padding: 50px; color: var(--accent-blue); }
+        .player-info { flex-grow: 1; }
+        .name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .player-name { font-weight: bold; font-size: 1.1rem; }
         
-        .auto-status {
-            text-align: center;
+        /* Pastille de couleur du joueur */
+        .player-color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 0 5px currentColor;
+        }
+
+        /* Système de titres */
+        .player-title {
             font-size: 0.7rem;
-            color: rgba(255,255,255,0.3);
-            margin-top: 15px;
+            font-weight: 800;
             text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 5px;
             letter-spacing: 1px;
         }
 
+        /* Animations des titres de haut niveau */
+        @keyframes shine { 0% { opacity: 0.8; } 50% { opacity: 1; filter: brightness(1.3); } 100% { opacity: 0.8; } }
+        .tier-epic { animation: shine 2s infinite ease-in-out; box-shadow: 0 0 8px currentColor; }
+        .tier-legendary { animation: shine 1s infinite linear; box-shadow: 0 0 12px currentColor; border: 1px solid rgba(255,255,255,0.2); }
+
+        .player-stats { display: flex; gap: 15px; }
+        .stat-item { font-size: 0.85rem; display: flex; align-items: center; gap: 4px; opacity: 0.8; }
+        .stat-coins { color: var(--accent-yellow); }
+        .stat-zones { color: var(--accent-blue); font-weight: bold; }
+
+        .auto-status { text-align: center; font-size: 0.65rem; color: rgba(255,255,255,0.3); margin-top: 15px; text-transform: uppercase; }
+        #loader { text-align: center; padding: 50px; color: var(--accent-blue); }
     </style>
 </head>
 <body>
 
 <div class="stats-container">
     <header>
-        <h1>Classement Territory War</h1>
-        <div class="subtitle"></div>
+        <h1>Territory War</h1>
+        <div style="color: var(--accent-blue); font-size: 0.7rem; font-weight: bold;">PANTHÉON DES CONQUÉRANTS</div>
     </header>
 
     <div class="leaderboard-wrapper">
-        <div id="loader">Chargement des données...</div>
+        <div id="loader">Synchronisation Firebase...</div>
         <div id="leaderboard-list"></div>
     </div>
 
-    <div class="auto-status">Mise à jour automatique sur Discord (1h)</div>
+    <div class="auto-status">Update Discord : Toutes les heures</div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+    import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
 
-    // Configuration Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyBqRloMg22mDsnfqhNK77vREQYtLFBgyf0",
         authDomain: "territory-war-acfca.firebaseapp.com",
@@ -148,7 +135,45 @@
 
     let playersData = [];
 
-    // Récupération des données en temps réel (pour l'affichage sur la page)
+    // Configuration des 25 Titres (Tous les 10 points)
+    const titles = [
+        { min: 0, label: "Vagabond", color: "#94a3b8" },
+        { min: 10, label: "Éclaireur", color: "#4ade80" },
+        { min: 20, label: "Soldat", color: "#22c55e" },
+        { min: 30, label: "Garde", color: "#3498db" },
+        { min: 40, label: "Vétéran", color: "#2980b9" },
+        { min: 50, label: "Chevalier", color: "#a855f7" },
+        { min: 60, label: "Baron", color: "#8b5cf6" },
+        { min: 70, label: "Vicomte", color: "#d946ef" },
+        { min: 80, label: "Comte", color: "#ec4899" },
+        { min: 90, label: "Marquis", color: "#f43f5e" },
+        { min: 100, label: "Duc", color: "#fb923c", class: "tier-epic" },
+        { min: 110, label: "Grand Duc", color: "#f97316", class: "tier-epic" },
+        { min: 120, label: "Prince", color: "#facc15", class: "tier-epic" },
+        { min: 130, label: "Archiduc", color: "#eab308", class: "tier-epic" },
+        { min: 140, label: "Gouverneur", color: "#fbbf24", class: "tier-epic" },
+        { min: 150, label: "Seigneur", color: "#f1c40f", class: "tier-legendary" },
+        { min: 160, label: "Haut Seigneur", color: "#f39c12", class: "tier-legendary" },
+        { min: 170, label: "Souverain", color: "#e67e22", class: "tier-legendary" },
+        { min: 180, label: "Monarque", color: "#d35400", class: "tier-legendary" },
+        { min: 190, label: "Empereur", color: "#e74c3c", class: "tier-legendary" },
+        { min: 200, label: "Légende", color: "#ff0000", class: "tier-legendary" },
+        { min: 210, label: "Demi-Dieu", color: "#00f2ff", class: "tier-legendary" },
+        { min: 220, label: "Divinité", color: "#006aff", class: "tier-legendary" },
+        { min: 230, label: "Maître du Monde", color: "#ff00e1", class: "tier-legendary" },
+        { min: 240, label: "Conquérant Galactique", color: "#ffffff", class: "tier-legendary" },
+        { min: 250, label: "Éternel", color: "linear-gradient(45deg, #fff, #f1c40f)", class: "tier-legendary" }
+    ];
+
+    function getTitleInfo(zones) {
+        let current = titles[0];
+        for (let t of titles) {
+            if (zones >= t.min) current = t;
+            else break;
+        }
+        return current;
+    }
+
     const usersRef = ref(db, 'users');
     onValue(usersRef, (snapshot) => {
         const data = snapshot.val();
@@ -157,7 +182,8 @@
         playersData = Object.keys(data).map(uid => ({
             name: data[uid].username || "Inconnu",
             coins: data[uid].coins || 0,
-            zones: data[uid].zonesCount || 0
+            zones: data[uid].zonesCount || 0,
+            color: data[uid].color || "#3498db" // Récupération de la couleur du joueur
         })).sort((a, b) => b.zones - a.zones);
 
         renderLeaderboard();
@@ -166,21 +192,31 @@
     function renderLeaderboard() {
         const list = document.getElementById('leaderboard-list');
         const loader = document.getElementById('loader');
-        
         loader.style.display = 'none';
         list.innerHTML = "";
 
         playersData.forEach((player, index) => {
+            const titleData = getTitleInfo(player.zones);
             const rank = index + 1;
+            
             const card = document.createElement('div');
             card.className = 'player-card';
             card.innerHTML = `
                 <div class="rank ${rank === 1 ? 'top-1' : ''}">#${rank}</div>
                 <div class="player-info">
-                    <span class="player-name">${player.name}</span>
+                    <div class="name-row">
+                        <span class="player-name">${player.name}</span>
+                        <div class="player-color-dot" style="color: ${player.color}; background-color: ${player.color};"></div>
+                        <span class="player-title ${titleData.class || ''}" 
+                              style="background: ${titleData.color.includes('gradient') ? titleData.color : 'transparent'}; 
+                                     color: ${titleData.color.includes('gradient') ? '#000' : titleData.color};
+                                     border: ${titleData.color.includes('gradient') ? 'none' : '1px solid ' + titleData.color}">
+                            ${titleData.label}
+                        </span>
+                    </div>
                     <div class="player-stats">
                         <div class="stat-item stat-coins">💰 ${player.coins}</div>
-                        <div class="stat-item stat-zones">🚩 ${player.zones} zones</div>
+                        <div class="stat-item stat-zones">🚩 ${player.zones} Territoires</div>
                     </div>
                 </div>
             `;
@@ -188,51 +224,49 @@
         });
     }
 
-    // Fonction d'envoi automatique vers Discord avec "boutons"
-    async function sendDiscordUpdate() {
+    // --- LOGIQUE WEBHOOK (Anti-spam horaire) ---
+    async function checkAndSendDiscord() {
         if (playersData.length === 0) return;
+        const lastUpdateRef = ref(db, 'lastDiscordUpdate');
+        const snapshot = await get(lastUpdateRef);
+        const lastTimestamp = snapshot.val() || 0;
+        const now = Date.now();
 
+        if (now - lastTimestamp >= 3600000) {
+            await set(lastUpdateRef, now);
+            sendDiscordUpdate();
+        }
+    }
+
+    async function sendDiscordUpdate() {
         const top10 = playersData.slice(0, 10);
-        let description = "🏆 **CLASSEMENT DES CONQUÉRANTS** 🏆\n\n";
+        let description = "🏆 **ÉTAT DES CONQUÊTES** 🏆\n\n";
         
         top10.forEach((p, i) => {
-            description += `**#${i+1}** | ${p.name} — \`${p.zones} Territoires\`\n`;
+            const title = getTitleInfo(p.zones);
+            description += `**#${i+1}** | ${p.name} [${title.label}] — \`${p.zones} 🚩\`\n`;
         });
 
-        // "Boutons" de navigation (Hyperliens formatés)
-        description += "\n---";
-        description += "\n🎮 **[JOUER AU JEU](https://kikofox16.github.io/Territory-War/)**";
-        description += "\n📊 **[CLASSEMENT EN DIRECT](https://kikofox16.github.io/Classement-TW/)**";
-
-        const payload = {
-            embeds: [{
-                title: "Territory War - Rapport de Guerre",
-                url: "https://kikofox16.github.io/Classement-TW/",
-                description: description,
-                color: 3447003,
-                timestamp: new Date().toISOString(),
-                footer: { text: "Mise à jour automatique horaire" }
-            }]
-        };
+        description += "\n🎮 **[JOUER](https://kikofox16.github.io/Territory-War/)** | 📊 **[LIVE](https://kikofox16.github.io/Classement-TW/)**";
 
         try {
             await fetch(WEBHOOK_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    embeds: [{
+                        title: "Territory War - Rapport Horaire",
+                        description: description,
+                        color: 3447003,
+                        timestamp: new Date().toISOString()
+                    }]
+                })
             });
-            console.log("Rapport envoyé à Discord.");
-        } catch (e) {
-            console.error("Erreur Webhook:", e);
-        }
+        } catch (e) { console.error(e); }
     }
 
-    // Intervalle de 1 heure (3600000 ms)
-    setInterval(sendDiscordUpdate, 3600000);
-    
-    // Premier envoi après 5 secondes pour valider le fonctionnement
-    setTimeout(sendDiscordUpdate, 5000);
-
+    setInterval(checkAndSendDiscord, 300000);
+    setTimeout(checkAndSendDiscord, 5000);
 </script>
 
 </body>
