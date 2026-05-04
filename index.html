@@ -7,266 +7,337 @@
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #000000 100%);
-            --accent-yellow: #f1c40f;
-            --accent-blue: #3498db;
-            --text-white: #ffffff;
             --panel-bg: rgba(255, 255, 255, 0.05);
+            --accent-gold: #f1c40f;
+            --accent-blue: #3498db;
+            --accent-green: #2ecc71;
+            --text-main: #ffffff;
         }
 
         body, html {
             margin: 0; padding: 0;
             width: 100%; height: 100%;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             background: var(--bg-gradient);
-            color: var(--text-white);
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            color: var(--text-main);
+            overflow-x: hidden;
         }
 
-        .stats-container {
-            width: 95%;
-            max-width: 650px;
-            height: 90vh;
+        .container {
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+            padding-bottom: 100px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin: 0;
+            background: linear-gradient(to bottom, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .leaderboard-list {
             display: flex;
             flex-direction: column;
-            background: var(--panel-bg);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(52, 152, 219, 0.3);
-            border-radius: 24px;
-            padding: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            box-sizing: border-box;
+            gap: 15px;
         }
 
-        header { text-align: center; margin-bottom: 20px; }
-        h1 { margin: 0; font-size: 1.6rem; text-transform: uppercase; letter-spacing: 3px; background: linear-gradient(to bottom, #fff, var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-        .leaderboard-wrapper { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
-        .leaderboard-wrapper::-webkit-scrollbar { width: 5px; }
-        .leaderboard-wrapper::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 10px; }
-
         .player-card {
-            display: flex;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.4);
-            margin-bottom: 12px;
-            padding: 12px 18px;
-            border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.05);
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 15px;
             transition: transform 0.2s;
         }
 
-        .rank { font-size: 1.2rem; font-weight: 900; width: 45px; color: var(--accent-blue); }
-        .rank.top-1 { color: var(--accent-yellow); text-shadow: 0 0 10px rgba(241, 196, 15, 0.5); }
+        .player-card:active {
+            transform: scale(0.98);
+        }
 
-        .player-info { flex-grow: 1; }
-        .name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-        .player-name { font-weight: bold; font-size: 1.1rem; }
-        
-        /* Pastille de couleur du joueur */
-        .player-color-dot {
+        .main-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .rank-badge {
+            font-weight: 900;
+            font-size: 1.2rem;
+            width: 35px;
+            color: rgba(255,255,255,0.3);
+        }
+
+        .player-identity {
+            flex-grow: 1;
+        }
+
+        .player-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .player-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .color-dot {
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.3);
-            box-shadow: 0 0 5px currentColor;
+            box-shadow: 0 0 10px currentColor;
         }
 
-        /* Système de titres */
-        .player-title {
-            font-size: 0.7rem;
-            font-weight: 800;
+        .stats-summary {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-top: 4px;
+        }
+
+        .zones-total {
+            background: rgba(46, 204, 113, 0.2);
+            color: var(--accent-green);
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed rgba(255,255,255,0.1);
+        }
+
+        .level-stat {
+            text-align: center;
+            background: rgba(0,0,0,0.3);
+            padding: 8px 4px;
+            border-radius: 12px;
+        }
+
+        .level-stat .label {
+            display: block;
+            font-size: 0.6rem;
             text-transform: uppercase;
-            padding: 2px 8px;
-            border-radius: 4px;
-            margin-left: 5px;
-            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 2px;
         }
 
-        /* Animations des titres de haut niveau */
-        @keyframes shine { 0% { opacity: 0.8; } 50% { opacity: 1; filter: brightness(1.3); } 100% { opacity: 0.8; } }
-        .tier-epic { animation: shine 2s infinite ease-in-out; box-shadow: 0 0 8px currentColor; }
-        .tier-legendary { animation: shine 1s infinite linear; box-shadow: 0 0 12px currentColor; border: 1px solid rgba(255,255,255,0.2); }
+        .level-stat .value {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
 
-        .player-stats { display: flex; gap: 15px; }
-        .stat-item { font-size: 0.85rem; display: flex; align-items: center; gap: 4px; opacity: 0.8; }
-        .stat-coins { color: var(--accent-yellow); }
-        .stat-zones { color: var(--accent-blue); font-weight: bold; }
+        .lv1 { color: var(--accent-blue); }
+        .lv2 { color: #9b59b6; }
+        .lv3 { color: var(--accent-gold); }
+        .lv4 { color: #e74c3c; }
 
-        .auto-status { text-align: center; font-size: 0.65rem; color: rgba(255,255,255,0.3); margin-top: 15px; text-transform: uppercase; }
-        #loader { text-align: center; padding: 50px; color: var(--accent-blue); }
+        .top-1 { border: 1px solid var(--accent-gold); }
+        .top-1 .rank-badge { color: var(--accent-gold); }
+
+        .nav-footer {
+            position: fixed;
+            bottom: 0; left: 0;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 15px 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            z-index: 100;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-play { background: var(--accent-green); color: #000; }
+        .btn-live { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
 
-<div class="stats-container">
+<div class="container">
     <header>
-        <h1>Territory War</h1>
-        <div style="color: var(--accent-blue); font-size: 0.7rem; font-weight: bold;">PANTHÉON DES CONQUÉRANTS</div>
+        <h1>Classement</h1>
+        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">Territory War • Live Update</div>
     </header>
 
-    <div class="leaderboard-wrapper">
-        <div id="loader">Synchronisation Firebase...</div>
-        <div id="leaderboard-list"></div>
-    </div>
-
-    <div class="auto-status">Update Discord : Toutes les heures</div>
+    <div id="leaderboard" class="leaderboard-list"></div>
 </div>
-
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-    import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+
+    // CONFIGURATION
+    const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1499848592502948023/UdkDYEnweBkJBRo7ZmtWwhgSw152y9hvnUcPWrcOoJtvahPpx8RuF7TiO5IfnepGSklG"; 
 
     const firebaseConfig = {
         apiKey: "AIzaSyBqRloMg22mDsnfqhNK77vREQYtLFBgyf0",
         authDomain: "territory-war-acfca.firebaseapp.com",
         databaseURL: "https://territory-war-acfca-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "territory-war-acfca",
-        storageBucket: "territory-war-acfca.firebasestorage.app",
-        messagingSenderId: "399616663350",
-        appId: "1:399616663350:web:b69d53d353181cbe679d97"
+        projectId: "territory-war-acfca"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const WEBHOOK_URL = "https://discord.com/api/webhooks/1499848592502948023/UdkDYEnweBkJBRo7ZmtWwhgSw152y9hvnUcPWrcOoJtvahPpx8RuF7TiO5IfnepGSklG";
 
-    let playersData = [];
-
-    // Configuration des 25 Titres (Tous les 10 points)
     const titles = [
-        { min: 0, label: "Vagabond", color: "#94a3b8" },
-        { min: 10, label: "Éclaireur", color: "#4ade80" },
-        { min: 20, label: "Soldat", color: "#22c55e" },
-        { min: 30, label: "Garde", color: "#3498db" },
-        { min: 40, label: "Vétéran", color: "#2980b9" },
-        { min: 50, label: "Chevalier", color: "#a855f7" },
-        { min: 60, label: "Baron", color: "#8b5cf6" },
-        { min: 70, label: "Vicomte", color: "#d946ef" },
-        { min: 80, label: "Comte", color: "#ec4899" },
-        { min: 90, label: "Marquis", color: "#f43f5e" },
-        { min: 100, label: "Duc", color: "#fb923c", class: "tier-epic" },
-        { min: 110, label: "Grand Duc", color: "#f97316", class: "tier-epic" },
-        { min: 120, label: "Prince", color: "#facc15", class: "tier-epic" },
-        { min: 130, label: "Archiduc", color: "#eab308", class: "tier-epic" },
-        { min: 140, label: "Gouverneur", color: "#fbbf24", class: "tier-epic" },
-        { min: 150, label: "Seigneur", color: "#f1c40f", class: "tier-legendary" },
-        { min: 160, label: "Haut Seigneur", color: "#f39c12", class: "tier-legendary" },
-        { min: 170, label: "Souverain", color: "#e67e22", class: "tier-legendary" },
-        { min: 180, label: "Monarque", color: "#d35400", class: "tier-legendary" },
-        { min: 190, label: "Empereur", color: "#e74c3c", class: "tier-legendary" },
-        { min: 200, label: "Légende", color: "#ff0000", class: "tier-legendary" },
-        { min: 210, label: "Demi-Dieu", color: "#00f2ff", class: "tier-legendary" },
-        { min: 220, label: "Divinité", color: "#006aff", class: "tier-legendary" },
-        { min: 230, label: "Maître du Monde", color: "#ff00e1", class: "tier-legendary" },
-        { min: 240, label: "Conquérant Galactique", color: "#ffffff", class: "tier-legendary" },
-        { min: 250, label: "Éternel", color: "linear-gradient(45deg, #fff, #f1c40f)", class: "tier-legendary" }
+        "Exilé", "Pilleur", "Chef de Meute", "Capitaine de Mercenaires", "Seigneur de Guerre",
+        "Baron de Fer", "Vicomte de Sang", "Comte Palatin", "Duc Souverain", "Héraut de la Victoire",
+        "Archiduc", "Prince Héritier", "Haut-Roi", "Protecteur du Royaume", "Grand Unificateur",
+        "César", "Empereur Auguste", "Suzerain des Nations", "Monarque Absolu", "Autocrate de l'Aube",
+        "Maître de la Destinée", "Architecte des Mondes", "Dominateur Stellaire", "Nexus de la Création", "Singularité Suprême"
     ];
 
-    function getTitleInfo(zones) {
-        let current = titles[0];
-        for (let t of titles) {
-            if (zones >= t.min) current = t;
-            else break;
-        }
-        return current;
+    function getRankStyle(zones) {
+        const index = Math.min(Math.floor(zones / 10), titles.length - 1);
+        const intensity = Math.min(zones / 250, 1);
+        const hue = 200 - (intensity * 200);
+        const color = zones < 10 ? "#888" : `hsl(${hue}, 80%, 60%)`;
+        return { title: titles[index], color: color, shadow: zones >= 10 ? `0 0 ${index * 2}px ${color}` : 'none' };
     }
 
-    const usersRef = ref(db, 'users');
-    onValue(usersRef, (snapshot) => {
-        const data = snapshot.val();
-        if (!data) return;
-
-        playersData = Object.keys(data).map(uid => ({
-            name: data[uid].username || "Inconnu",
-            coins: data[uid].coins || 0,
-            zones: data[uid].zonesCount || 0,
-            color: data[uid].color || "#3498db" // Récupération de la couleur du joueur
-        })).sort((a, b) => b.zones - a.zones);
-
-        renderLeaderboard();
-    });
-
-    function renderLeaderboard() {
-        const list = document.getElementById('leaderboard-list');
-        const loader = document.getElementById('loader');
-        loader.style.display = 'none';
-        list.innerHTML = "";
-
-        playersData.forEach((player, index) => {
-            const titleData = getTitleInfo(player.zones);
-            const rank = index + 1;
-            
-            const card = document.createElement('div');
-            card.className = 'player-card';
-            card.innerHTML = `
-                <div class="rank ${rank === 1 ? 'top-1' : ''}">#${rank}</div>
-                <div class="player-info">
-                    <div class="name-row">
-                        <span class="player-name">${player.name}</span>
-                        <div class="player-color-dot" style="color: ${player.color}; background-color: ${player.color};"></div>
-                        <span class="player-title ${titleData.class || ''}" 
-                              style="background: ${titleData.color.includes('gradient') ? titleData.color : 'transparent'}; 
-                                     color: ${titleData.color.includes('gradient') ? '#000' : titleData.color};
-                                     border: ${titleData.color.includes('gradient') ? 'none' : '1px solid ' + titleData.color}">
-                            ${titleData.label}
-                        </span>
-                    </div>
-                    <div class="player-stats">
-                        <div class="stat-item stat-coins">💰 ${player.coins}</div>
-                        <div class="stat-item stat-zones">🚩 ${player.zones} Territoires</div>
-                    </div>
-                </div>
-            `;
-            list.appendChild(card);
-        });
-    }
-
-    // --- LOGIQUE WEBHOOK (Anti-spam horaire) ---
-    async function checkAndSendDiscord() {
-        if (playersData.length === 0) return;
-        const lastUpdateRef = ref(db, 'lastDiscordUpdate');
-        const snapshot = await get(lastUpdateRef);
-        const lastTimestamp = snapshot.val() || 0;
+    async function sendDiscordUpdate(sortedPlayers) {
         const now = Date.now();
+        const lastUpdate = localStorage.getItem('lastWebhookTime');
+        
+        if (lastUpdate && (now - lastUpdate < 3600000)) return;
 
-        if (now - lastTimestamp >= 3600000) {
-            await set(lastUpdateRef, now);
-            sendDiscordUpdate();
-        }
-    }
-
-    async function sendDiscordUpdate() {
-        const top10 = playersData.slice(0, 10);
-        let description = "🏆 **ÉTAT DES CONQUÊTES** 🏆\n\n";
+        const top10 = sortedPlayers.slice(0, 10);
+        let description = "🏆 **TOP 10 CONQUÉRANTS**\n\n";
         
         top10.forEach((p, i) => {
-            const title = getTitleInfo(p.zones);
-            description += `**#${i+1}** | ${p.name} [${title.label}] — \`${p.zones} 🚩\`\n`;
+            const title = getRankStyle(p.zonesCount).title;
+            const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🔹";
+            description += `${medal} **${p.name}**\n└ *${title}* • **${p.zonesCount} zones**\n\n`;
         });
 
-        description += "\n🎮 **[JOUER](https://kikofox16.github.io/Territory-War/)** | 📊 **[LIVE](https://kikofox16.github.io/Classement-TW/)**";
+        const payload = {
+            embeds: [{
+                title: "Territory War - Classement",
+                description: description,
+                color: 15844367,
+                timestamp: new Date().toISOString()
+            }],
+            components: [
+                {
+                    type: 1,
+                    components: [
+                        {
+                            type: 2,
+                            label: "Jouer",
+                            style: 5,
+                            url: "https://kikofox16.github.io/Territory-War/"
+                        },
+                        {
+                            type: 2,
+                            label: "Classement en direct",
+                            style: 5,
+                            url: "https://kikofox16.github.io/Classement-TW/"
+                        }
+                    ]
+                }
+            ]
+        };
 
         try {
-            await fetch(WEBHOOK_URL, {
+            await fetch(DISCORD_WEBHOOK_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    embeds: [{
-                        title: "Territory War - Rapport Horaire",
-                        description: description,
-                        color: 3447003,
-                        timestamp: new Date().toISOString()
-                    }]
-                })
+                body: JSON.stringify(payload)
             });
+            localStorage.setItem('lastWebhookTime', now);
         } catch (e) { console.error(e); }
     }
 
-    setInterval(checkAndSendDiscord, 300000);
-    setTimeout(checkAndSendDiscord, 5000);
+    const lbContainer = document.getElementById('leaderboard');
+
+    onValue(ref(db), (snapshot) => {
+        const data = snapshot.val();
+        const users = data.users || {};
+        const zones = data.zones || {};
+        const playerStats = {};
+        
+        Object.keys(users).forEach(uid => {
+            playerStats[uid] = {
+                name: users[uid].username,
+                color: users[uid].color,
+                coins: users[uid].coins || 0,
+                zonesCount: users[uid].zonesCount || 0,
+                l1: 0, l2: 0, l3: 0, l4: 0
+            };
+        });
+
+        Object.values(zones).forEach(z => {
+            if (z.ownerId && playerStats[z.ownerId]) {
+                const lvl = z.level || 1;
+                if (lvl === 1) playerStats[z.ownerId].l1++;
+                else if (lvl === 2) playerStats[z.ownerId].l2++;
+                else if (lvl === 3) playerStats[z.ownerId].l3++;
+                else if (lvl >= 4) playerStats[z.ownerId].l4++;
+            }
+        });
+
+        const sorted = Object.values(playerStats).sort((a, b) => b.zonesCount - a.zonesCount);
+        sendDiscordUpdate(sorted);
+
+        lbContainer.innerHTML = "";
+        sorted.forEach((p, index) => {
+            const rankStyle = getRankStyle(p.zonesCount);
+            const card = document.createElement('div');
+            card.className = `player-card ${index === 0 ? 'top-1' : ''}`;
+            card.innerHTML = `
+                <div class="main-info">
+                    <div class="rank-badge">#${index + 1}</div>
+                    <div class="player-identity">
+                        <span class="player-title" style="color: ${rankStyle.color}; text-shadow: ${rankStyle.shadow}">${rankStyle.title}</span>
+                        <div class="player-name"><span class="color-dot" style="color: ${p.color}; background: ${p.color}"></span>${p.name}</div>
+                        <div class="stats-summary">💰 ${p.coins.toLocaleString()} pièces</div>
+                    </div>
+                    <div class="zones-total">${p.zonesCount} 🚩</div>
+                </div>
+                <div class="details-grid">
+                    <div class="level-stat"><span class="label">Niv. 1</span><span class="value lv1">${p.l1}</span></div>
+                    <div class="level-stat"><span class="label">Niv. 2</span><span class="value lv2">${p.l2}</span></div>
+                    <div class="level-stat"><span class="label">Niv. 3</span><span class="value lv3">${p.l3}</span></div>
+                    <div class="level-stat"><span class="label">Niv. 4</span><span class="value lv4">${p.l4}</span></div>
+                </div>
+            `;
+            lbContainer.appendChild(card);
+        });
+    });
 </script>
 
 </body>
